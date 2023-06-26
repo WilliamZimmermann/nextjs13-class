@@ -11,7 +11,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useContext } from "react";
 import { ApplicationContext } from "@/context/application.provider";
 
@@ -31,6 +31,7 @@ export default function MyMenu() {
   const applicationContext = useContext(ApplicationContext);
 
   const router = useRouter();
+  const pathname = usePathname();
 
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
@@ -110,6 +111,7 @@ export default function MyMenu() {
                 <MenuItem
                   key={page.label}
                   onClick={(e) => handleOpenPage(page.route)}
+                  selected={page.route === pathname}
                 >
                   <Typography textAlign="center">{page.label}</Typography>
                 </MenuItem>
@@ -139,7 +141,11 @@ export default function MyMenu() {
               <Button
                 key={page.label}
                 onClick={(e) => handleOpenPage(page.route)}
-                sx={{ my: 2, color: "white", display: "block" }}
+                sx={{
+                  my: 2,
+                  color: page.route === pathname ? "black" : "white",
+                  display: "block",
+                }}
               >
                 {page.label}
               </Button>
