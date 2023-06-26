@@ -1,10 +1,10 @@
 "use client";
 
-import { Button, Grid, TextField } from "@mui/material";
+import { Alert, Box, Button, Grid, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ApplicationContext } from "@/context/application.provider";
 import { ContactContext } from "@/context/contact.provider";
 
@@ -24,9 +24,17 @@ interface ContactForm {
   message: string;
 }
 
+interface AlertMessage {
+  severity: "success" | "info" | "warning" | "error";
+  message: string;
+}
+
 export default function ContactForm() {
   const applicationContext = useContext(ApplicationContext);
   const contactContext = useContext(ContactContext);
+  const [alertMessage, setAlertMessage] = useState<AlertMessage | undefined>(
+    undefined
+  );
 
   const {
     register,
@@ -43,8 +51,29 @@ export default function ContactForm() {
 
   function onFormSubmit(data: ContactForm) {
     applicationContext.setName(data.name);
-    contactContext.setName(data.name);
-    contactContext.setEmail(data.email);
+
+    if (isValid) {
+      fetch("/api/v1/contact", { method: "POST", body: JSON.stringify(data) })
+        .then((response) => {
+          if (response.ok) {
+            setAlertMessage({
+              severity: "success",
+              message: "Your form was successfully submitted.",
+            });
+          } else {
+            setAlertMessage({
+              severity: "error",
+              message: "An error occurred while submitting your form.",
+            });
+          }
+        })
+        .catch((error) => {
+          setAlertMessage({
+            severity: "error",
+            message: `An error occurred while submitting your form: ${error.message}`,
+          });
+        });
+    }
   }
 
   useEffect(() => {
@@ -56,63 +85,70 @@ export default function ContactForm() {
   }, [watch("email")]);
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)}>
-      <Grid container rowSpacing={3}>
-        <Grid item sm={12}>
-          <TextField
-            id="name"
-            label="Name"
-            variant="outlined"
-            fullWidth
-            {...register("name")}
-            error={!!errors.name}
-            helperText={errors.name?.message}
-            required
-          />
+    <>
+      {alertMessage && (
+        <Box sx={{ mb: 3 }}>
+          <Alert severity={alertMessage.severity}>{alertMessage.message}</Alert>
+        </Box>
+      )}
+      <form onSubmit={handleSubmit(onFormSubmit)}>
+        <Grid container rowSpacing={3}>
+          <Grid item sm={12}>
+            <TextField
+              id="name"
+              label="Name"
+              variant="outlined"
+              fullWidth
+              {...register("name")}
+              error={!!errors.name}
+              helperText={errors.name?.message}
+              required
+            />
+          </Grid>
+          <Grid item sm={12}>
+            <TextField
+              id="email"
+              label="E-mail"
+              variant="outlined"
+              fullWidth
+              {...register("email")}
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              required
+            />
+          </Grid>
+          <Grid item sm={12}>
+            <TextField
+              id="subject"
+              label="Subject"
+              variant="outlined"
+              fullWidth
+              {...register("subject")}
+              error={!!errors.subject}
+              helperText={errors.subject?.message}
+              required
+            />
+          </Grid>
+          <Grid item sm={12}>
+            <TextField
+              id="message"
+              label="Message"
+              variant="outlined"
+              multiline
+              fullWidth
+              {...register("message")}
+              error={!!errors.message}
+              helperText={errors.message?.message}
+              required
+            />
+          </Grid>
+          <Grid item sm={12}>
+            <Button variant="contained" type="submit" disabled={!isValid}>
+              Send
+            </Button>
+          </Grid>
         </Grid>
-        <Grid item sm={12}>
-          <TextField
-            id="email"
-            label="E-mail"
-            variant="outlined"
-            fullWidth
-            {...register("email")}
-            error={!!errors.email}
-            helperText={errors.email?.message}
-            required
-          />
-        </Grid>
-        <Grid item sm={12}>
-          <TextField
-            id="subject"
-            label="Subject"
-            variant="outlined"
-            fullWidth
-            {...register("subject")}
-            error={!!errors.subject}
-            helperText={errors.subject?.message}
-            required
-          />
-        </Grid>
-        <Grid item sm={12}>
-          <TextField
-            id="message"
-            label="Message"
-            variant="outlined"
-            multiline
-            fullWidth
-            {...register("message")}
-            error={!!errors.message}
-            helperText={errors.message?.message}
-            required
-          />
-        </Grid>
-        <Grid item sm={12}>
-          <Button variant="contained" type="submit" disabled={!isValid}>
-            Send
-          </Button>
-        </Grid>
-      </Grid>
-    </form>
+      </form>
+    </>
   );
 }
