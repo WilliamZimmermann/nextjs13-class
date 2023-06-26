@@ -24,7 +24,7 @@ const pages: MenuItem[] = [
   { label: "Home", route: "/" },
   { label: "About", route: "/about" },
   { label: "Projects", route: "/projects" },
-  { label: "Contact", route: "contact" },
+  { label: "Contact", route: "/contact" },
 ];
 
 export default function MyMenu() {

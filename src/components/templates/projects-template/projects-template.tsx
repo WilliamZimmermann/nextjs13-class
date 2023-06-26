@@ -2,17 +2,15 @@
 
 import HeaderTitle from "@/components/atoms/header-title/header-title";
 import Card from "@/components/molecules/my-card/my-card";
-import { useTranslations } from "next-intl";
+import { Box, Container } from "@mui/material";
 
-export default function Projects() {
-  const t = useTranslations();
-
+export default function ProjectsTemplate() {
   return (
-    <>
+    <Container>
       <HeaderTitle title="Projects" subtitle="Take a look at my projects" />
-      <div className="container">
-        <div className="row">
-          <div className="col-4">
+      <Box className="container">
+        <Box className="row">
+          <Box className="col-4">
             <Card
               title="Project 1"
               imageSrc="/assets/dog.jpg"
@@ -21,8 +19,8 @@ export default function Projects() {
               buttonText="Visit my Project"
               buttonUrl="/projects/1"
             />
-          </div>
-          <div className="col-4">
+          </Box>
+          <Box className="col-4">
             <Card
               title="Project 2"
               imageSrc="/assets/woman.jpg"
@@ -31,8 +29,8 @@ export default function Projects() {
               buttonText="Visit my Other Project"
               buttonUrl="/projects/2"
             />
-          </div>
-          <div className="col-4">
+          </Box>
+          <Box className="col-4">
             <Card
               title="Project 3"
               imageSrc="/assets/man.jpg"
@@ -41,9 +39,9 @@ export default function Projects() {
               buttonText="Visit my Other Project"
               buttonUrl="/projects/3"
             />
-          </div>
-        </div>
-      </div>
-    </>
+          </Box>
+        </Box>
+      </Box>
+    </Container>
   );
 }
