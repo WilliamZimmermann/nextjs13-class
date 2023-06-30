@@ -7,6 +7,8 @@ import * as yup from "yup";
 import { useContext, useEffect, useState } from "react";
 import { ApplicationContext } from "@/context/application.provider";
 import { ContactContext } from "@/context/contact.provider";
+import ReCaptcha from "@/components/molecules/recaptcha/recaptcha";
+import { GoogleReCaptcha } from "react-google-recaptcha-v3";
 
 const schema = yup
   .object({
@@ -14,6 +16,7 @@ const schema = yup
     email: yup.string().email("This is not a valid e-mail.").required(),
     subject: yup.string().required(),
     message: yup.string().required(),
+    recaptchaToken: yup.string().required(),
   })
   .required();
 
@@ -22,6 +25,7 @@ interface ContactForm {
   email: string;
   subject: string;
   message: string;
+  recaptchaToken: string;
 }
 
 interface AlertMessage {
@@ -39,13 +43,14 @@ export default function ContactForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     watch,
     formState: { errors, isValid },
   } = useForm<ContactForm>({
     defaultValues: {
       name: applicationContext.name,
     },
-    mode: "onBlur",
+    mode: "onChange",
     resolver: yupResolver(schema),
   });
 
@@ -73,6 +78,9 @@ export default function ContactForm() {
             message: `An error occurred while submitting your form: ${error.message}`,
           });
         });
+
+      /* Refresh recaptcha */
+      setRefreshReCaptcha((r) => !r);
     }
   }
 
@@ -80,9 +88,11 @@ export default function ContactForm() {
     applicationContext.setName(watch("name"));
   }, [watch("name")]);
 
-  useEffect(() => {
-    contactContext.setEmail(watch("email"));
-  }, [watch("email")]);
+  const [refreshReCaptcha, setRefreshReCaptcha] = useState(false);
+
+  function onVerifyRecaptcha(token: string) {
+    setValue("recaptchaToken", token);
+  }
 
   return (
     <>
@@ -143,6 +153,12 @@ export default function ContactForm() {
             />
           </Grid>
           <Grid item sm={12}>
+            <ReCaptcha>
+              <GoogleReCaptcha
+                onVerify={(token) => setValue("recaptchaToken", token)}
+                refreshReCaptcha={refreshReCaptcha}
+              />
+            </ReCaptcha>
             <Button variant="contained" type="submit" disabled={!isValid}>
               Send
             </Button>
